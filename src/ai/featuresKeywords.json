@@ -1,0 +1,39 @@
+[
+    {
+        "name": "parking",
+        "words": [
+            "estacionar",
+            "estacionamento",
+            "sair",
+            "embora",
+            "casa"
+        ],
+        "order": 3
+    },
+    {
+        "name": "snacks",
+        "words": [
+            "comida",
+            "comer",
+            "bebida",
+            "bebidas",
+            "fome",
+            "lanche",
+            "lanchar",
+            "café",
+            "cafe"
+        ],
+        "order": 1
+    },
+    {
+        "name": "assistance",
+        "words": [
+            "atendimento",
+            "atender",
+            "cae",
+            "cac",
+            "requerimento"
+        ],
+        "order": 2
+    }
+]

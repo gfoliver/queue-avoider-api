@@ -35,5 +35,17 @@
             "requerimento"
         ],
         "order": 2
+    },
+    {
+        "name": "greetings",
+        "words": [
+            "oi",
+            "ola",
+            "olá",
+            "bom dia",
+            "boa tarde",
+            "boa noite"
+        ],
+        "order": 0
     }
 ]

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 
 import featuresKeywords from "./featuresKeywords.json";
-import parkingRules from "./parkingRules.json";
+import RULES from "./rules.json";
 
 @Injectable()
 export class AiService {
@@ -29,6 +29,28 @@ export class AiService {
         return foundFeatures;
     }
 
+    isHighVolumeDate(date): boolean {
+        const mappedHighVolumeDateSpans = RULES.highVolumeDates.map(d => {
+            let r = d;
+            while (r.includes('{year}'))
+                r = r.replace('{year}', date.getFullYear().toString());
+
+            return r.split('|');
+        });
+        
+        let isHighVolumeDate = false;
+        
+        mappedHighVolumeDateSpans.forEach(span => {
+            const start = new Date(span[0]);
+            const end = new Date(span[1]);
+
+            if (date >= start && date <= end)
+                isHighVolumeDate = true;
+        });
+
+        return isHighVolumeDate;
+    }
+
     processAnswerParking(): IAnswer[] {
         /* 
         
@@ -47,28 +69,12 @@ export class AiService {
         const now = new Date();
 
         // primeiramente, vamos verificar se estamos dentro de um dos períodos de alta movimentação
-        const mappedHighVolumeDateSpans = parkingRules.highVolumeParkingDates.map(d => {
-            let r = d;
-            while (r.includes('{year}'))
-                r = r.replace('{year}', now.getFullYear().toString());
-
-            return r.split('|');
-        });
-        
-        let isHighVolumeDate = false;
-        
-        mappedHighVolumeDateSpans.forEach(span => {
-            const start = new Date(span[0]);
-            const end = new Date(span[1]);
-
-            if (now >= start && now <= end)
-                isHighVolumeDate = true;
-        });
+        const isHighVolumeDate = this.isHighVolumeDate(now);
 
         // agora, vamos verificar se o horário atual está próximo do horário de saída
         let isNearToExitTime = false;
 
-        for (const time of parkingRules.shiftEndingTimes) {
+        for (const time of RULES.shiftEndingTimes) {
             const exitTime = new Date();
             exitTime.setHours(Number(time.split(':')[0]));
             exitTime.setMinutes(Number(time.split(':')[1]));
@@ -97,6 +103,36 @@ export class AiService {
         // dica adicional
         answers.push({
             message: "Caso ainda não possua, vale a pena adquirir a credencial do estacionamento, pois com ela é possível economizar nas tarifas, e também evitar a fila de pagamento na cabine.",
+            isTip: true
+        });
+
+        return answers;
+    }
+
+    processAnswerAssistance(): IAnswer[] {
+        let answers = [];
+
+        /* 
+        - SE está no início/fim de semestre ENTÃO o aluno deve evitar atendimento caso não seja urgente
+        - Tentar ir em dias menos movimentados, como sexta feira
+        - Evitar horário do intervalo
+        */
+
+        const now = new Date();
+
+        // primeiramente, vamos verificar se estamos dentro de um dos períodos de alta movimentação
+        const isHighVolumeDate = this.isHighVolumeDate(now);
+
+        if (isHighVolumeDate) {
+            answers.push({
+                message: "Durante este período do semestre o atendimento costuma ter um grande fluxo de pessoas, principalmente no início da semana",
+                isTip: false
+            });
+        }
+
+        // dica adicional
+        answers.push({
+            message: "Caso seu atendimento não seja urgente, tente ir em dias menos movimentados, como sexta feira, e evite o horário do intervalo.",
             isTip: true
         });
 
@@ -133,7 +169,6 @@ export class AiService {
         for (const feature of features) {
             switch (feature) {
                 case "greetings":
-                    console.log('aquiii');
                     answers.push(...this.greetings());
                     break;
                 case "snacks":
@@ -143,7 +178,7 @@ export class AiService {
                     answers.push(...this.processAnswerParking());
                 break;
                 case "assistance":
-                    //
+                    answers.push(...this.processAnswerAssistance());
                 break;
             }
         }

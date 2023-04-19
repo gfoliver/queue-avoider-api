@@ -1,0 +1,10 @@
+{
+    "highVolumeDates": [
+        "{year}_02_01|{year}_03_15",
+        "{year}_06_15|{year}_08_15",
+        "{year}_11_15|{year}_12_15"
+    ],
+    "shiftEndingTimes": [
+        "22:00"
+    ]
+}

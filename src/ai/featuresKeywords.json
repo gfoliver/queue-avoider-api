@@ -21,7 +21,11 @@
             "lanche",
             "lanchar",
             "café",
-            "cafe"
+            "cafe",
+            "salgado",
+            "pastel",
+            "refrigerante",
+            "refri"
         ],
         "order": 1
     },
@@ -32,7 +36,12 @@
             "atender",
             "cae",
             "cac",
-            "requerimento"
+            "requerimento",
+            "suporte",
+            "financeiro",
+            "fies",
+            "matricula",
+            "matrícula"
         ],
         "order": 2
     },

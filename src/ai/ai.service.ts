@@ -159,8 +159,9 @@ export class AiService {
         const informedBuilding = question.toLocaleLowerCase().includes('prédio') || question.toLocaleLowerCase().includes('predio');
         if (informedBuilding) {
             const isBuilding7 = question.toLocaleLowerCase().includes('prédio 7') || question.toLocaleLowerCase().includes('predio 7');
+            const isBuilding6 = question.toLocaleLowerCase().includes('prédio 6') || question.toLocaleLowerCase().includes('predio 6');
             shops = shops.map(s => {
-                if (isBuilding7)
+                if (isBuilding7 || isBuilding6)
                     if (s.name === 'Bar do Prédio 7')
                         s.points++;
                     else

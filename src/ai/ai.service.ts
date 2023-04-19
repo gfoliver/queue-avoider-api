@@ -139,6 +139,58 @@ export class AiService {
         return answers;
     }
 
+    processAnswerSnacks(question: string): IAnswer[] {
+        let answers = [];
+
+        /* 
+        OK - Lancherias com mais movimento
+        OK - Horários mais movimentados
+        - Ranking de lancherias mais próximas de cada prédio
+        */
+
+        // Lancherias são inicialmente pontuadas de acordo com o volume de movimento
+        // A lancheria com maior volume de movimento recebe 0 pontos, a segunda maior recebe 1 ponto, e assim por diante
+        let shops = RULES.snackShopsVolumeRanking.map((s, index) => ({
+            name: s,
+            points: index
+        }));
+        
+        // detect building
+        const informedBuilding = question.toLocaleLowerCase().includes('prédio') || question.toLocaleLowerCase().includes('predio');
+        if (informedBuilding) {
+            const isBuilding7 = question.toLocaleLowerCase().includes('prédio 7') || question.toLocaleLowerCase().includes('predio 7');
+            shops = shops.map(s => {
+                if (isBuilding7)
+                    if (s.name === 'Bar do Prédio 7')
+                        s.points++;
+                    else
+                        s.points--;
+                else
+                    if (s.name === 'Bar do Prédio 7')
+                        s.points--;
+                    else
+                        s.points++;
+    
+                return s;
+            });
+        }
+
+        // get the shop with the highest points
+        const shop = shops.reduce((prev, current) => (prev.points > current.points) ? prev : current);
+
+        answers.push({
+            message: `Recomendo que você vá na lancheria "${shop.name}"`,
+            isTip: false
+        })
+
+        answers.push({
+            message: "Para evitar filas, é ideal evitar o horário do intervalo, se possível, tente ir ao menos 20 minutos antes ou após o intervalo",
+            isTip: true
+        });
+
+        return answers;
+    }
+
     greetings() {
         const now = new Date();
         const hour = now.getHours();
@@ -160,7 +212,7 @@ export class AiService {
             }];
     }
 
-    buildAnswers(features: string[]) {
+    buildAnswers(features: string[], question: string) {
         if (features.length === 0 || !features.some(f => this.supportedFeatures.includes(f)))
             return [this.defaultAnswer];
 
@@ -172,7 +224,7 @@ export class AiService {
                     answers.push(...this.greetings());
                     break;
                 case "snacks":
-                    //
+                    answers.push(...this.processAnswerSnacks(question));
                 break;
                 case "parking":
                     answers.push(...this.processAnswerParking());
@@ -188,9 +240,8 @@ export class AiService {
 
     handleQuestion(question: string) {
         const features = this.getFeatures(question);
-        console.log(features);
         
-        const answers = this.buildAnswers(features);
+        const answers = this.buildAnswers(features, question);
 
         return {
             question,
